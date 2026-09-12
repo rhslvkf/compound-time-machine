@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { ASSET_GROUPS, PRICES } from '../lib/prices';
+import { assetGroups, type PriceData } from '../lib/prices';
 import { Sheet } from './Sheet';
 
 interface SingleProps {
   mode: 'single';
+  data: PriceData;
   selected: string;
   onSelect: (id: string) => void;
   onClose: () => void;
@@ -11,6 +12,7 @@ interface SingleProps {
 
 interface MultiProps {
   mode: 'multi';
+  data: PriceData;
   selected: string[];
   /** 목록에서 빼는 자산(예: 지금 보고 있는 자산) */
   exclude?: string;
@@ -52,8 +54,8 @@ export function AssetPicker(props: Props) {
         ) : undefined
       }
     >
-      {ASSET_GROUPS.map((group) => {
-        const items = PRICES.assets.filter((a) => a.group === group && a.id !== exclude);
+      {assetGroups(props.data).map((group) => {
+        const items = props.data.assets.filter((a) => a.group === group && a.id !== exclude);
         if (items.length === 0) return null;
         return (
           <div key={group} className="asset-group">

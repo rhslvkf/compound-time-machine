@@ -7,28 +7,29 @@ import { ShareButton } from '../components/ShareButton';
 import { ChevronRight } from '../components/icons';
 import { MAX_COMPARE, backtest, backtestMany, maxYearsFor, type PastInputs } from '../lib/backtest';
 import { formatSignedPercent, formatSignedWon, formatWon, formatWonFull } from '../lib/format';
-import { PRICES, formatMonthKey } from '../lib/prices';
+import { formatMonthKey, type PriceData } from '../lib/prices';
 
 interface Props {
+  prices: PriceData;
   inputs: PastInputs;
   onChange: (next: PastInputs) => void;
 }
 
 type Picker = 'asset' | 'compare' | null;
 
-export function Past({ inputs, onChange }: Props) {
+export function Past({ prices, inputs, onChange }: Props) {
   const set = <K extends keyof PastInputs>(key: K, value: PastInputs[K]) => onChange({ ...inputs, [key]: value });
   const [picker, setPicker] = useState<Picker>(null);
 
-  const maxYears = maxYearsFor(inputs.assetId);
+  const maxYears = maxYearsFor(prices, inputs.assetId);
   const years = Math.min(inputs.years, maxYears);
   const effective = useMemo(() => ({ ...inputs, years }), [inputs, years]);
-  const result = useMemo(() => backtest(effective), [effective]);
+  const result = useMemo(() => backtest(prices, effective), [prices, effective]);
   // 이전 버전에서 저장된 상태에는 compareIds가 없을 수 있다
   const compareIds = useMemo(() => (inputs.compareIds ?? []).filter((id) => id !== inputs.assetId), [inputs.compareIds, inputs.assetId]);
   const compared = useMemo(
-    () => backtestMany({ initial: effective.initial, monthly: effective.monthly, years: effective.years, compareIds: [] }, compareIds),
-    [effective, compareIds],
+    () => backtestMany(prices, { initial: effective.initial, monthly: effective.monthly, years: effective.years, compareIds: [] }, compareIds),
+    [prices, effective, compareIds],
   );
 
   if (!result) return null;
@@ -192,14 +193,15 @@ export function Past({ inputs, onChange }: Props) {
       />
 
       <footer className="notice">
-        <p>{formatMonthKey(PRICES.asOf)} 기준 월별 종가로 계산한 가상 시뮬레이션이에요. 과거 성과가 앞으로의 수익을 보장하지 않아요.</p>
+        <p>{formatMonthKey(prices.asOf)} 기준 월별 종가로 계산한 가상 시뮬레이션이에요. 과거 성과가 앞으로의 수익을 보장하지 않아요.</p>
         <p>매월 그 달 종가에 사서 마지막 달 종가로 평가했어요. 배당·이자·수수료·세금·환전 비용은 반영하지 않았고, 달러 자산은 그 달 환율로 원화 환산했어요.</p>
-        <p>출처: {PRICES.source}</p>
+        <p>출처: {prices.source}</p>
       </footer>
 
       {picker === 'asset' && (
         <AssetPicker
           mode="single"
+          data={prices}
           selected={inputs.assetId}
           onSelect={(id) => {
             set('assetId', id);
@@ -211,6 +213,7 @@ export function Past({ inputs, onChange }: Props) {
       {picker === 'compare' && (
         <AssetPicker
           mode="multi"
+          data={prices}
           selected={compareIds}
           exclude={inputs.assetId}
           max={MAX_COMPARE}

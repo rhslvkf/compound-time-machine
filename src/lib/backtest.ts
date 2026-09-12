@@ -1,5 +1,5 @@
 import type { Point } from './compound';
-import { findAsset, type Asset } from './prices';
+import { findAsset, type Asset, type PriceData } from './prices';
 
 export interface PastInputs {
   assetId: string;
@@ -35,8 +35,8 @@ export interface PastResult {
 export const MAX_PAST_YEARS = 15;
 
 /** 시작 시점 목돈 + 매월 정액 매수(그 달 종가 기준)를 마지막 달 종가로 평가한다. */
-export function backtest(inputs: PastInputs): PastResult | null {
-  const asset = findAsset(inputs.assetId);
+export function backtest(data: PriceData, inputs: PastInputs): PastResult | null {
+  const asset = findAsset(data, inputs.assetId);
   if (!asset) return null;
   const series = asset.series;
   if (series.length < 2) return null;
@@ -83,13 +83,13 @@ export function backtest(inputs: PastInputs): PastResult | null {
 }
 
 /** 같은 조건을 주어진 자산들에 적용한다(입력 순서 유지). */
-export function backtestMany(inputs: Omit<PastInputs, 'assetId'>, ids: string[]): PastResult[] {
-  return ids.map((id) => backtest({ ...inputs, assetId: id })).filter((r): r is PastResult => r !== null);
+export function backtestMany(data: PriceData, inputs: Omit<PastInputs, 'assetId'>, ids: string[]): PastResult[] {
+  return ids.map((id) => backtest(data, { ...inputs, assetId: id })).filter((r): r is PastResult => r !== null);
 }
 
 /** 이 자산으로 고를 수 있는 최대 기간(년) */
-export function maxYearsFor(assetId: string): number {
-  const asset = findAsset(assetId);
+export function maxYearsFor(data: PriceData, assetId: string): number {
+  const asset = findAsset(data, assetId);
   if (!asset) return MAX_PAST_YEARS;
   return Math.max(1, Math.min(MAX_PAST_YEARS, Math.floor((asset.series.length - 1) / 12)));
 }

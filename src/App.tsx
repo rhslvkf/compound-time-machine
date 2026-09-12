@@ -3,6 +3,7 @@ import './App.css';
 import { Segmented } from './components/Segmented';
 import { clampInputs } from './lib/compound';
 import { closeApp, haptic, readSafeArea, subscribeBack, subscribeSafeArea } from './lib/sdk';
+import { loadInitialPrices, refreshPrices, type PriceData } from './lib/prices';
 import { loadState, saveState, type AppState, type Mode } from './lib/storage';
 import { Main } from './screens/Main';
 import { Past } from './screens/Past';
@@ -21,6 +22,7 @@ function applySafeArea() {
 
 function App() {
   const [state, setState] = useState<AppState | null>(null);
+  const [prices, setPrices] = useState<PriceData | null>(null);
   const saveTimer = useRef<number | null>(null);
 
   useEffect(() => {
@@ -29,6 +31,14 @@ function App() {
     const unsubSafe = subscribeSafeArea(() => applySafeArea());
     loadState().then((v) => {
       if (alive) setState(v);
+    });
+    // 가격 데이터: 캐시·번들로 바로 그리고, 원격에 더 새 것이 있으면 조용히 바꾼다
+    loadInitialPrices().then((initial) => {
+      if (!alive) return;
+      setPrices(initial);
+      refreshPrices(initial).then((fresh) => {
+        if (alive && fresh) setPrices(fresh);
+      });
     });
     return () => {
       alive = false;
@@ -50,7 +60,7 @@ function App() {
     });
   }, []);
 
-  if (state === null) {
+  if (state === null || prices === null) {
     return (
       <div className="screen canvas" aria-busy="true">
         <div className="skeleton skeleton-title" />
@@ -76,7 +86,7 @@ function App() {
         />
       </div>
       {state.mode === 'past' ? (
-        <Past inputs={state.past} onChange={(past) => update({ past })} />
+        <Past prices={prices} inputs={state.past} onChange={(past) => update({ past })} />
       ) : (
         <Main inputs={state.future} onChange={(future) => update({ future })} />
       )}
