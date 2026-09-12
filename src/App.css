@@ -724,12 +724,17 @@
   width: 100%;
   min-height: 52px;
   padding: var(--space-2) var(--space-4);
-  border: 0;
+  /* 투명 테두리를 기본으로 두어 선택 행에 테두리가 생겨도 크기가 변하지 않는다 */
+  border: 2px solid transparent;
   border-radius: 12px;
   background: var(--color-bg);
   font: inherit;
   text-align: left;
   cursor: pointer;
+}
+
+.compare-row-mine {
+  border-color: var(--brand-primary);
 }
 
 .compare-row-on {

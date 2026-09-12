@@ -182,7 +182,13 @@ export function Past({ prices, inputs, onChange }: Props) {
             <li key={r.asset.id}>
               <button
                 type="button"
-                className={r.asset.id === hot ? 'compare-row compare-row-on' : 'compare-row'}
+                className={[
+                  'compare-row',
+                  r.asset.id === hot ? 'compare-row-on' : '',
+                  r.asset.id === inputs.assetId ? 'compare-row-mine' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
                 aria-pressed={r.asset.id === hot}
                 onClick={() => {
                   void haptic('tickWeak');
@@ -218,7 +224,7 @@ export function Past({ prices, inputs, onChange }: Props) {
           {compared.length === 0 ? '비교할 자산 고르기' : '비교 자산 바꾸기'}
         </button>
         <p className="card-note">
-          수익률 높은 순이에요. 자산을 누르면 그래프에서 그 선이 돋보여요.{compared.some((r) => r.months < result.months) && ' 데이터가 짧은 자산은 있는 기간만큼만 계산해요.'}
+          수익률 높은 순이에요. 테두리가 있는 행이 지금 보고 있는 자산이고, 자산을 누르면 그래프에서 그 선이 돋보여요.{compared.some((r) => r.months < result.months) && ' 데이터가 짧은 자산은 있는 기간만큼만 계산해요.'}
         </p>
       </section>
 
