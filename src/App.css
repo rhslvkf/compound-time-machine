@@ -551,14 +551,26 @@
 /* 순위 */
 .rank {
   display: inline-block;
-  min-width: 22px;
-  margin-right: var(--space-2);
+  min-width: 18px;
+  font-size: var(--font-size-body-small);
   font-weight: var(--font-weight-subtitle);
-  color: var(--color-text-hint);
+  color: var(--color-text-subtle);
 }
 
-.scenario-on .rank {
+.compare-row-on .rank {
   color: var(--brand-primary);
+}
+
+.compare-me {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 2px var(--space-2);
+  border-radius: 8px;
+  background: var(--brand-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-subtitle);
+  color: var(--color-text-inverse);
+  vertical-align: middle;
 }
 
 .scenario-meta {

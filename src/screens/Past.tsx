@@ -38,7 +38,9 @@ export function Past({ prices, inputs, onChange }: Props) {
   const usedYears = Math.floor(result.months / 12);
   const usedRest = result.months % 12;
   const periodLabel = usedRest === 0 ? `${usedYears}년` : `${usedYears}년 ${usedRest}개월`;
-  const allResults = [result, ...compared];
+  // 색은 선택 순서(현재 자산이 0번)로 고정하고, 목록은 수익률 순으로 보여준다
+  const allResults = [result, ...compared].map((r, colorIndex) => ({ r, colorIndex }));
+  const ranked = [...allResults].sort((a, b) => b.r.returnRate - a.r.returnRate);
 
   return (
     <main className="screen canvas">
@@ -164,13 +166,17 @@ export function Past({ prices, inputs, onChange }: Props) {
 
       <section className="card">
         <h2 className="card-title">같은 돈을 다른 자산에 넣었다면</h2>
-        {compared.length > 0 && <CompareChart results={allResults} months={result.months} yearsLabel={`${usedYears}년 전`} />}
+        {compared.length > 0 && (
+          <CompareChart results={allResults.map((x) => x.r)} months={result.months} yearsLabel={`${usedYears}년 전`} />
+        )}
         <ul className="compare-list">
-          {allResults.map((r, i) => (
-            <li key={r.asset.id} className={i === 0 ? 'compare-row compare-row-on' : 'compare-row'}>
-              <span className={`split-dot compare-dot-${i}`} aria-hidden="true" />
+          {ranked.map(({ r, colorIndex }, i) => (
+            <li key={r.asset.id} className={colorIndex === 0 ? 'compare-row compare-row-on' : 'compare-row'}>
+              <span className="rank tabular">{i + 1}</span>
+              <span className={`split-dot compare-dot-${colorIndex}`} aria-hidden="true" />
               <span className="compare-name">
                 {r.asset.name}
+                {colorIndex === 0 && <span className="compare-me">내 선택</span>}
                 {r.months < result.months && <span className="scenario-meta tabular"> · {Math.floor(r.months / 12)}년치</span>}
               </span>
               <span className="compare-figures">
@@ -194,9 +200,9 @@ export function Past({ prices, inputs, onChange }: Props) {
         >
           {compared.length === 0 ? '비교할 자산 고르기' : '비교 자산 바꾸기'}
         </button>
-        {compared.some((r) => r.months < result.months) && (
-          <p className="card-note">데이터가 짧은 자산은 있는 기간만큼만 계산해요.</p>
-        )}
+        <p className="card-note">
+          수익률 높은 순이에요.{compared.some((r) => r.months < result.months) && ' 데이터가 짧은 자산은 있는 기간만큼만 계산해요.'}
+        </p>
       </section>
 
       <ShareButton
