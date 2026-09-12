@@ -2,11 +2,11 @@ import { TossAds } from '@apps-in-toss/web-framework';
 import { useEffect, useRef, useState } from 'react';
 
 /**
- * 배너 광고 그룹 ID.
- * 지금은 테스트 ID다 — 콘솔에서 운영 광고 그룹을 발급받으면 이 값을 바꾼다.
- * 검수·출시 번들에는 반드시 운영 ID를 쓴다(테스트 ID로 출시하면 정책 위반).
+ * 배너 광고 그룹 ID — 콘솔에서 발급한 운영 ID(2026-09-12).
+ * 개발 중 테스트가 필요하면 'ait-ad-test-banner-id'로 잠시 바꾸되, 검수·출시 번들에는
+ * 반드시 운영 ID를 쓴다(운영 ID로 반복 테스트하면 정책 위반).
  */
-const BANNER_AD_GROUP_ID = 'ait-ad-test-banner-id';
+const BANNER_AD_GROUP_ID = 'ait.v2.live.7acbb53bf2e84b00';
 
 let initState: 'idle' | 'pending' | 'ready' | 'failed' = 'idle';
 const waiters: Array<(ok: boolean) => void> = [];
