@@ -1,0 +1,35 @@
+name: Update prices
+
+# 매월 2일 12:00 KST(03:00 UTC)에 가격 데이터를 새로 받아 커밋한다.
+# 앱은 jsDelivr CDN을 통해 main 브랜치의 src/data/prices.json을 실행 시 읽는다.
+on:
+  schedule:
+    - cron: '0 3 2 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Fetch prices
+        run: node scripts/fetch-prices.mjs
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- src/data/prices.json; then
+            echo "no change"; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/prices.json
+          git commit -m "data: update prices ($(date -u +%Y-%m))"
+          git push
+      - name: Purge jsDelivr cache
+        run: |
+          curl -fsS "https://purge.jsdelivr.net/gh/${GITHUB_REPOSITORY}@main/src/data/prices.json" || echo "purge skipped"
