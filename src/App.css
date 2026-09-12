@@ -561,17 +561,6 @@
   color: var(--brand-primary);
 }
 
-.compare-me {
-  display: inline-block;
-  margin-left: var(--space-2);
-  padding: 2px var(--space-2);
-  border-radius: 8px;
-  background: var(--brand-primary);
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-subtitle);
-  color: var(--color-text-inverse);
-  vertical-align: middle;
-}
 
 .scenario-meta {
   color: var(--color-text-subtle);
@@ -700,6 +689,14 @@
   stroke-linecap: round;
 }
 
+.compare-line-hot {
+  stroke-width: 4;
+}
+
+.compare-line-dim {
+  opacity: 0.3;
+}
+
 .compare-line-0 { stroke: var(--chart-0); }
 .compare-line-1 { stroke: var(--chart-1); }
 .compare-line-2 { stroke: var(--chart-2); }
@@ -724,10 +721,15 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  width: 100%;
   min-height: 52px;
   padding: var(--space-2) var(--space-4);
+  border: 0;
   border-radius: 12px;
   background: var(--color-bg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .compare-row-on {

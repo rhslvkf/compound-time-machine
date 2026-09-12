@@ -7,6 +7,8 @@ interface Props {
   /** 기준 개월 수 — 가장 긴 축 */
   months: number;
   yearsLabel: string;
+  /** 돋보이게 그릴 자산 id — 이 선은 맨 위에 굵게, 나머지는 흐리게 */
+  highlightId?: string;
 }
 
 const W = 320;
@@ -17,7 +19,7 @@ const PAD_T = 12;
 const PAD_B = 28;
 
 /** 여러 자산의 평가액 추이를 같은 축에 선으로 겹친다. 선 색은 .compare-line-N 클래스가 정한다. */
-export function CompareChart({ results, months, yearsLabel }: Props) {
+export function CompareChart({ results, months, yearsLabel, highlightId }: Props) {
   const maxY = Math.max(1, ...results.flatMap((r) => r.points.map((p) => p.total)));
   const innerW = W - PAD_L - PAD_R;
   const innerH = H - PAD_T - PAD_B;
@@ -26,15 +28,20 @@ export function CompareChart({ results, months, yearsLabel }: Props) {
 
   return (
     <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="자산별 평가액 비교">
-      {results.map((r, i) => {
-        const line = r.points
-          .map((p) => {
-            const monthsAgo = r.months - Math.min(p.year * 12, r.months);
-            return `${x(monthsAgo).toFixed(1)},${y(p.total).toFixed(1)}`;
-          })
-          .join(' ');
-        return <polyline key={r.asset.id} className={`compare-line compare-line-${i}`} points={line} />;
-      })}
+      {results
+        .map((r, i) => ({ r, i }))
+        // 돋보일 선을 마지막에 그려 다른 선 위에 올린다
+        .sort((a, b) => Number(a.r.asset.id === highlightId) - Number(b.r.asset.id === highlightId))
+        .map(({ r, i }) => {
+          const line = r.points
+            .map((p) => {
+              const monthsAgo = r.months - Math.min(p.year * 12, r.months);
+              return `${x(monthsAgo).toFixed(1)},${y(p.total).toFixed(1)}`;
+            })
+            .join(' ');
+          const state = !highlightId ? '' : r.asset.id === highlightId ? ' compare-line-hot' : ' compare-line-dim';
+          return <polyline key={r.asset.id} className={`compare-line compare-line-${i}${state}`} points={line} />;
+        })}
       <text className="chart-tick" x={PAD_L} y={H - 8} textAnchor="start">
         {yearsLabel}
       </text>

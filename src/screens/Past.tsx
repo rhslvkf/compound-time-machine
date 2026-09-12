@@ -21,6 +21,8 @@ type Picker = 'asset' | 'compare' | null;
 export function Past({ prices, inputs, onChange }: Props) {
   const set = <K extends keyof PastInputs>(key: K, value: PastInputs[K]) => onChange({ ...inputs, [key]: value });
   const [picker, setPicker] = useState<Picker>(null);
+  /** 비교 그래프에서 돋보이게 볼 자산. 비어 있으면 지금 보는 자산 */
+  const [highlightId, setHighlightId] = useState<string | null>(null);
 
   const maxYears = maxYearsFor(prices, inputs.assetId);
   const years = Math.min(inputs.years, maxYears);
@@ -41,6 +43,7 @@ export function Past({ prices, inputs, onChange }: Props) {
   // 색은 선택 순서(현재 자산이 0번)로 고정하고, 목록은 수익률 순으로 보여준다
   const allResults = [result, ...compared].map((r, colorIndex) => ({ r, colorIndex }));
   const ranked = [...allResults].sort((a, b) => b.r.returnRate - a.r.returnRate);
+  const hot = highlightId && allResults.some((x) => x.r.asset.id === highlightId) ? highlightId : inputs.assetId;
 
   return (
     <main className="screen canvas">
@@ -167,26 +170,40 @@ export function Past({ prices, inputs, onChange }: Props) {
       <section className="card">
         <h2 className="card-title">같은 돈을 다른 자산에 넣었다면</h2>
         {compared.length > 0 && (
-          <CompareChart results={allResults.map((x) => x.r)} months={result.months} yearsLabel={`${usedYears}년 전`} />
+          <CompareChart
+            results={allResults.map((x) => x.r)}
+            months={result.months}
+            yearsLabel={`${usedYears}년 전`}
+            highlightId={hot}
+          />
         )}
         <ul className="compare-list">
           {ranked.map(({ r, colorIndex }, i) => (
-            <li key={r.asset.id} className={colorIndex === 0 ? 'compare-row compare-row-on' : 'compare-row'}>
-              <span className="rank tabular">{i + 1}</span>
-              <span className={`split-dot compare-dot-${colorIndex}`} aria-hidden="true" />
-              <span className="compare-name">
-                {r.asset.name}
-                {colorIndex === 0 && <span className="compare-me">내 선택</span>}
-                {r.months < result.months && <span className="scenario-meta tabular"> · {Math.floor(r.months / 12)}년치</span>}
-              </span>
-              <span className="compare-figures">
-                <span className={r.gain >= 0 ? 'scenario-total tabular' : 'scenario-total scenario-total-loss tabular'}>
-                  {formatWon(r.total)}
+            <li key={r.asset.id}>
+              <button
+                type="button"
+                className={r.asset.id === hot ? 'compare-row compare-row-on' : 'compare-row'}
+                aria-pressed={r.asset.id === hot}
+                onClick={() => {
+                  void haptic('tickWeak');
+                  setHighlightId(r.asset.id);
+                }}
+              >
+                <span className="rank tabular">{i + 1}</span>
+                <span className={`split-dot compare-dot-${colorIndex}`} aria-hidden="true" />
+                <span className="compare-name">
+                  {r.asset.name}
+                  {r.months < result.months && <span className="scenario-meta tabular"> · {Math.floor(r.months / 12)}년치</span>}
                 </span>
-                <span className={r.gain >= 0 ? 'compare-rate tabular' : 'compare-rate compare-rate-loss tabular'}>
-                  {formatSignedPercent(r.returnRate)}
+                <span className="compare-figures">
+                  <span className={r.gain >= 0 ? 'scenario-total tabular' : 'scenario-total scenario-total-loss tabular'}>
+                    {formatWon(r.total)}
+                  </span>
+                  <span className={r.gain >= 0 ? 'compare-rate tabular' : 'compare-rate compare-rate-loss tabular'}>
+                    {formatSignedPercent(r.returnRate)}
+                  </span>
                 </span>
-              </span>
+              </button>
             </li>
           ))}
         </ul>
@@ -201,7 +218,7 @@ export function Past({ prices, inputs, onChange }: Props) {
           {compared.length === 0 ? '비교할 자산 고르기' : '비교 자산 바꾸기'}
         </button>
         <p className="card-note">
-          수익률 높은 순이에요.{compared.some((r) => r.months < result.months) && ' 데이터가 짧은 자산은 있는 기간만큼만 계산해요.'}
+          수익률 높은 순이에요. 자산을 누르면 그래프에서 그 선이 돋보여요.{compared.some((r) => r.months < result.months) && ' 데이터가 짧은 자산은 있는 기간만큼만 계산해요.'}
         </p>
       </section>
 
