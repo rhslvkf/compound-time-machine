@@ -764,3 +764,14 @@
 .compare-rate-loss {
   color: var(--color-danger);
 }
+
+/* 배너 광고 — 광고가 그려졌을 때만 자리를 차지한다 */
+.banner-ad {
+  display: none;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.banner-ad.is-visible {
+  display: block;
+}

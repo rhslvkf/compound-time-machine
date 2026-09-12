@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { AmountField } from '../components/AmountField';
 import { AssetPicker } from '../components/AssetPicker';
+import { BannerAd } from '../components/BannerAd';
 import { CompareChart } from '../components/CompareChart';
 import { GrowthChart } from '../components/GrowthChart';
 import { ShareButton } from '../components/ShareButton';
@@ -166,6 +167,8 @@ export function Past({ prices, inputs, onChange }: Props) {
           </span>
         </div>
       </section>
+
+      <BannerAd />
 
       <section className="card">
         <h2 className="card-title">같은 돈을 다른 자산에 넣었다면</h2>

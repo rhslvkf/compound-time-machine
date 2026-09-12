@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { AmountField } from '../components/AmountField';
 import { Chips } from '../components/Chips';
+import { BannerAd } from '../components/BannerAd';
 import { GrowthChart } from '../components/GrowthChart';
 import { ShareButton } from '../components/ShareButton';
 import { MAX_YEARS, monthsToGoal, project, requiredMonthly, summarize, type Inputs } from '../lib/compound';
@@ -150,6 +151,8 @@ export function Main({ inputs, onChange }: Props) {
           {inputs.years}년 뒤 자산의 <strong className="tabular">{interestPct}%</strong>는 복리가 벌어준 돈이에요.
         </p>
       </section>
+
+      <BannerAd />
 
       <section className="card">
         <h2 className="card-title">목표 금액</h2>
