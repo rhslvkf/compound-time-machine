@@ -21,7 +21,7 @@ type Picker = 'asset' | 'compare' | null;
 export function Past({ prices, inputs, onChange }: Props) {
   const set = <K extends keyof PastInputs>(key: K, value: PastInputs[K]) => onChange({ ...inputs, [key]: value });
   const [picker, setPicker] = useState<Picker>(null);
-  /** 비교 그래프에서 돋보이게 볼 자산. 비어 있으면 지금 보는 자산 */
+  /** 비교 그래프에서 돋보이게 볼 자산. null이면 전체 선을 같은 굵기로 보여준다 */
   const [highlightId, setHighlightId] = useState<string | null>(null);
 
   const maxYears = maxYearsFor(prices, inputs.assetId);
@@ -43,7 +43,7 @@ export function Past({ prices, inputs, onChange }: Props) {
   // 색은 선택 순서(현재 자산이 0번)로 고정하고, 목록은 수익률 순으로 보여준다
   const allResults = [result, ...compared].map((r, colorIndex) => ({ r, colorIndex }));
   const ranked = [...allResults].sort((a, b) => b.r.returnRate - a.r.returnRate);
-  const hot = highlightId && allResults.some((x) => x.r.asset.id === highlightId) ? highlightId : inputs.assetId;
+  const hot = highlightId && allResults.some((x) => x.r.asset.id === highlightId) ? highlightId : null;
 
   return (
     <main className="screen canvas">
@@ -174,7 +174,7 @@ export function Past({ prices, inputs, onChange }: Props) {
             results={allResults.map((x) => x.r)}
             months={result.months}
             yearsLabel={`${usedYears}년 전`}
-            highlightId={hot}
+            highlightId={hot ?? undefined}
           />
         )}
         <ul className="compare-list">
@@ -192,7 +192,8 @@ export function Past({ prices, inputs, onChange }: Props) {
                 aria-pressed={r.asset.id === hot}
                 onClick={() => {
                   void haptic('tickWeak');
-                  setHighlightId(r.asset.id);
+                  // 같은 자산을 다시 누르면 해제한다
+                  setHighlightId((prev) => (prev === r.asset.id ? null : r.asset.id));
                 }}
               >
                 <span className="rank tabular">{i + 1}</span>
@@ -224,7 +225,7 @@ export function Past({ prices, inputs, onChange }: Props) {
           {compared.length === 0 ? '비교할 자산 고르기' : '비교 자산 바꾸기'}
         </button>
         <p className="card-note">
-          수익률 높은 순이에요. 테두리가 있는 행이 지금 보고 있는 자산이고, 자산을 누르면 그래프에서 그 선이 돋보여요.{compared.some((r) => r.months < result.months) && ' 데이터가 짧은 자산은 있는 기간만큼만 계산해요.'}
+          수익률 높은 순이에요. 테두리가 있는 행이 지금 보고 있는 자산이에요. 자산을 누르면 그래프에서 그 선이 돋보이고, 다시 누르면 돌아와요.{compared.some((r) => r.months < result.months) && ' 데이터가 짧은 자산은 있는 기간만큼만 계산해요.'}
         </p>
       </section>
 
