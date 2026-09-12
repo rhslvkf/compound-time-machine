@@ -1,3 +1,5 @@
+import { haptic } from '../lib/sdk';
+
 interface Option<T> {
   value: T;
   label: string;
@@ -19,7 +21,10 @@ export function Chips<T extends string | number>({ label, options, value, onChan
           type="button"
           className={o.value === value ? 'chip chip-on' : 'chip'}
           aria-pressed={o.value === value}
-          onClick={() => onChange(o.value)}
+          onClick={() => {
+            void haptic('tap');
+            onChange(o.value);
+          }}
         >
           {o.label}
         </button>

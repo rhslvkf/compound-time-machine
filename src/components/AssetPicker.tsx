@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { assetGroups, type PriceData } from '../lib/prices';
+import { haptic } from '../lib/sdk';
 import { Sheet } from './Sheet';
 
 interface SingleProps {
@@ -29,6 +30,7 @@ export function AssetPicker(props: Props) {
 
   const isOn = (id: string) => (props.mode === 'single' ? props.selected === id : draft.includes(id));
   const toggle = (id: string) => {
+    void haptic('tap');
     if (props.mode === 'single') {
       props.onSelect(id);
       return;
@@ -48,7 +50,14 @@ export function AssetPicker(props: Props) {
       onClose={props.onClose}
       footer={
         props.mode === 'multi' ? (
-          <button type="button" className="button-primary" onClick={() => props.onDone(draft)}>
+          <button
+            type="button"
+            className="button-primary"
+            onClick={() => {
+              void haptic(draft.length > 0 ? 'success' : 'tap');
+              props.onDone(draft);
+            }}
+          >
             {draft.length === 0 ? '선택 없이 닫기' : `${draft.length}개 비교하기`}
           </button>
         ) : undefined

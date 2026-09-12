@@ -8,6 +8,7 @@ import { ChevronRight } from '../components/icons';
 import { MAX_COMPARE, backtest, backtestMany, maxYearsFor, type PastInputs } from '../lib/backtest';
 import { formatSignedPercent, formatSignedWon, formatWon, formatWonFull } from '../lib/format';
 import { formatMonthKey, type PriceData } from '../lib/prices';
+import { haptic } from '../lib/sdk';
 
 interface Props {
   prices: PriceData;
@@ -74,7 +75,14 @@ export function Past({ prices, inputs, onChange }: Props) {
         <h2 className="card-title">조건</h2>
         <div className="field">
           <span className="field-label">어떤 자산에</span>
-          <button type="button" className="row-button" onClick={() => setPicker('asset')}>
+          <button
+            type="button"
+            className="row-button"
+            onClick={() => {
+              void haptic('tap');
+              setPicker('asset');
+            }}
+          >
             <span className="row-button-text">
               <span className="row-button-value">{result.asset.name}</span>
               {result.asset.note && <span className="row-button-meta">{result.asset.note}</span>}
@@ -97,7 +105,10 @@ export function Past({ prices, inputs, onChange }: Props) {
             step={1}
             value={years}
             aria-label="몇 년 전부터"
-            onChange={(e) => set('years', Number(e.target.value))}
+            onChange={(e) => {
+              void haptic('tickWeak');
+              set('years', Number(e.target.value));
+            }}
           />
           <div className="slider-scale">
             <span>1년 전</span>
@@ -173,7 +184,14 @@ export function Past({ prices, inputs, onChange }: Props) {
             </li>
           ))}
         </ul>
-        <button type="button" className="button-secondary" onClick={() => setPicker('compare')}>
+        <button
+          type="button"
+          className="button-secondary"
+          onClick={() => {
+            void haptic('tap');
+            setPicker('compare');
+          }}
+        >
           {compared.length === 0 ? '비교할 자산 고르기' : '비교 자산 바꾸기'}
         </button>
         {compared.some((r) => r.months < result.months) && (

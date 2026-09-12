@@ -5,6 +5,7 @@ import { GrowthChart } from '../components/GrowthChart';
 import { ShareButton } from '../components/ShareButton';
 import { MAX_YEARS, monthsToGoal, project, requiredMonthly, summarize, type Inputs } from '../lib/compound';
 import { formatMonths, formatPercent, formatWon, formatWonFull } from '../lib/format';
+import { haptic } from '../lib/sdk';
 
 interface Props {
   inputs: Inputs;
@@ -76,7 +77,10 @@ export function Main({ inputs, onChange }: Props) {
           step={1}
           value={inputs.years}
           aria-label="기간(년)"
-          onChange={(e) => set('years', Number(e.target.value))}
+          onChange={(e) => {
+            void haptic('tickWeak');
+            set('years', Number(e.target.value));
+          }}
         />
         <div className="slider-scale">
           <span>1년</span>
@@ -170,7 +174,14 @@ export function Main({ inputs, onChange }: Props) {
                 <p className="card-note">
                   {inputs.years}년 안에 도달하려면 매월 <strong className="tabular">{formatWon(needMonthlyRounded)}</strong>이 필요해요.
                 </p>
-                <button type="button" className="button-secondary" onClick={() => set('monthly', needMonthlyRounded)}>
+                <button
+                  type="button"
+                  className="button-secondary"
+                  onClick={() => {
+                    void haptic('success');
+                    set('monthly', needMonthlyRounded);
+                  }}
+                >
                   매월 {formatWon(needMonthlyRounded)}으로 바꾸기
                 </button>
               </>
